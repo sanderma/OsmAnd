@@ -9,6 +9,8 @@ import android.graphics.Rect;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -94,6 +96,7 @@ public class MapInfoLayer extends OsmandMapLayer implements ICoveredScreenRectPr
 	private final BoundsChangeListener topPanelBoundsChangeListener;
 	private final BoundsChangeListener bottomPanelBoundsChangeListener;
 	private VerticalPanelVisibilityListener bottomWidgetsVisibilityListener;
+	private VerticalPanelVisibilityListener bottomPanelPositionUpdateListener;
 	private WindowInsetsCompat lastWindowInsets;
 
 	private boolean isContentVisible = false;
@@ -138,6 +141,17 @@ public class MapInfoLayer extends OsmandMapLayer implements ICoveredScreenRectPr
 			mapDisplayPositionManager.registerCoveredScreenRectProvider(this);
 			topWidgetsPanel.addOnLayoutChangeListener(topPanelBoundsChangeListener);
 			bottomWidgetsPanel.addOnLayoutChangeListener(bottomPanelBoundsChangeListener);
+
+			// When the bottom panel first becomes visible its height is still 0 (layout hasn't
+			// run yet). Schedule a post-layout update so the car-icon offset is computed with
+			// the real panel height before the first frame is drawn.
+			bottomPanelPositionUpdateListener = isVisible -> {
+				if (isVisible) {
+					schedulePositionUpdateAfterLayout(bottomWidgetsPanel);
+				}
+			};
+			bottomWidgetsPanel.addVisibilityListener(bottomPanelPositionUpdateListener);
+
 			mapDisplayPositionManager.updateMapDisplayPosition(true);
 		} else {
 			if (topWidgetsPanel != null) {
@@ -146,6 +160,7 @@ public class MapInfoLayer extends OsmandMapLayer implements ICoveredScreenRectPr
 			if (bottomWidgetsPanel != null) {
 				bottomWidgetsPanel.removeOnLayoutChangeListener(bottomPanelBoundsChangeListener);
 				bottomWidgetsPanel.removeVisibilityListener(bottomWidgetsVisibilityListener);
+				bottomWidgetsPanel.removeVisibilityListener(bottomPanelPositionUpdateListener);
 			}
 			if (mapHudLayout != null) {
 				mapHudLayout.removeWidget(rulerWidget);
@@ -189,6 +204,20 @@ public class MapInfoLayer extends OsmandMapLayer implements ICoveredScreenRectPr
 			}
 		}
 		updateLayerInsets(isVisible, false);
+	}
+
+	private void schedulePositionUpdateAfterLayout(@NonNull View view) {
+		ViewTreeObserver vto = view.getViewTreeObserver();
+		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				ViewTreeObserver currentVto = view.getViewTreeObserver();
+				if (currentVto.isAlive()) {
+					currentVto.removeOnGlobalLayoutListener(this);
+				}
+				mapDisplayPositionManager.updateMapDisplayPosition(true);
+			}
+		});
 	}
 
 	private void updateLayerInsets(boolean isVisible, boolean forceUpdate) {
