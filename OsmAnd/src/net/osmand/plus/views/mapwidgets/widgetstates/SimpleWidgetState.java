@@ -14,11 +14,13 @@ import net.osmand.util.Algorithms;
 public class SimpleWidgetState extends ResizableWidgetState {
 
 	private final CommonPreference<Boolean> showIconPref;
+	private final CommonPreference<Boolean> dynamicHeightPref;
 	private final WidgetType widgetType;
 
 	public SimpleWidgetState(@NonNull OsmandApplication app, @Nullable String customId, @NonNull WidgetType widgetType, @NonNull WidgetSize defaultWidgetSize) {
 		super(app, customId, widgetType, defaultWidgetSize);
 		this.showIconPref = registerShowIconPref(customId, widgetType);
+		this.dynamicHeightPref = registerDynamicHeightPref(customId, widgetType);
 		this.widgetType = widgetType;
 	}
 
@@ -33,8 +35,22 @@ public class SimpleWidgetState extends ResizableWidgetState {
 	}
 
 	@NonNull
+	private CommonPreference<Boolean> registerDynamicHeightPref(@Nullable String customId, @NonNull WidgetType widgetType) {
+		String prefId = "simple_widget_dynamic_height" + widgetType.id;
+		if (!Algorithms.isEmpty(customId)) {
+			prefId += customId;
+		}
+		return settings.registerBooleanPreference(prefId, true).makeProfile();
+	}
+
+	@NonNull
 	public CommonPreference<Boolean> getShowIconPref() {
 		return showIconPref;
+	}
+
+	@NonNull
+	public CommonPreference<Boolean> getDynamicHeightPref() {
+		return dynamicHeightPref;
 	}
 
 	@NonNull
@@ -57,5 +73,6 @@ public class SimpleWidgetState extends ResizableWidgetState {
 	@Override
 	public void copyPrefsFromMode(@NonNull ApplicationMode sourceAppMode, @NonNull ApplicationMode appMode, @Nullable String customId){
 		registerShowIconPref(customId, widgetType).setModeValue(appMode, showIconPref.getModeValue(sourceAppMode));
+		registerDynamicHeightPref(customId, widgetType).setModeValue(appMode, dynamicHeightPref.getModeValue(sourceAppMode));
 	}
 }

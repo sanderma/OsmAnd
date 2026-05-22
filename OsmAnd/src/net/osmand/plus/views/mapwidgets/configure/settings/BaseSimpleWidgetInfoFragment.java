@@ -14,10 +14,13 @@ import net.osmand.plus.views.mapwidgets.widgets.SimpleWidget;
 
 public class BaseSimpleWidgetInfoFragment extends BaseResizableWidgetSettingFragment {
 	private static final String SHOW_ICON_KEY = "show_icon_key";
+	private static final String DYNAMIC_HEIGHT_KEY = "dynamic_height_key";
 
 	public CommonPreference<Boolean> shouldShowIconPref;
+	public CommonPreference<Boolean> dynamicHeightPref;
 
 	private boolean showIcon;
+	private boolean dynamicHeight;
 	private View showIconContainer;
 
 	@Override
@@ -26,6 +29,8 @@ public class BaseSimpleWidgetInfoFragment extends BaseResizableWidgetSettingFrag
 		if (widgetInfo != null && widgetInfo.widget instanceof SimpleWidget simpleWidget) {
 			shouldShowIconPref = simpleWidget.shouldShowIconPref();
 			showIcon = bundle.containsKey(SHOW_ICON_KEY) ? bundle.getBoolean(SHOW_ICON_KEY) : shouldShowIconPref.get();
+			dynamicHeightPref = simpleWidget.getDynamicHeightPref();
+			dynamicHeight = bundle.containsKey(DYNAMIC_HEIGHT_KEY) ? bundle.getBoolean(DYNAMIC_HEIGHT_KEY) : dynamicHeightPref.get();
 		}
 	}
 
@@ -33,6 +38,7 @@ public class BaseSimpleWidgetInfoFragment extends BaseResizableWidgetSettingFrag
 	public void onSaveInstanceState(@NonNull Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putBoolean(SHOW_ICON_KEY, showIcon);
+		outState.putBoolean(DYNAMIC_HEIGHT_KEY, dynamicHeight);
 	}
 
 	@Override
@@ -46,6 +52,18 @@ public class BaseSimpleWidgetInfoFragment extends BaseResizableWidgetSettingFrag
 		showIconContainer.setOnClickListener(v -> updateShowIcon(!showIcon, switchCompat));
 		showIconContainer.setBackground(getPressedStateDrawable());
 		updateShowIconContainerVisibility();
+
+		if (dynamicHeightPref != null) {
+			inflate(R.layout.simple_widget_dynamic_height_setting, container);
+			SwitchCompat dynamicHeightSwitch = container.findViewById(R.id.dynamic_height_toggle);
+			dynamicHeightSwitch.setChecked(dynamicHeight);
+			View dynamicHeightContainer = container.findViewById(R.id.dynamic_height_container);
+			dynamicHeightContainer.setOnClickListener(v -> {
+				dynamicHeight = !dynamicHeight;
+				dynamicHeightSwitch.setChecked(dynamicHeight);
+			});
+			dynamicHeightContainer.setBackground(getPressedStateDrawable());
+		}
 	}
 
 	private void updateShowIconContainerVisibility() {
@@ -66,6 +84,9 @@ public class BaseSimpleWidgetInfoFragment extends BaseResizableWidgetSettingFrag
 	@Override
 	protected void applySettings() {
 		shouldShowIconPref.set(showIcon);
+		if (dynamicHeightPref != null) {
+			dynamicHeightPref.set(dynamicHeight);
+		}
 		if (widgetInfo != null) {
 			if (widgetInfo.widget instanceof SimpleWidget simpleWidget) {
 				simpleWidget.updateWidgetView();

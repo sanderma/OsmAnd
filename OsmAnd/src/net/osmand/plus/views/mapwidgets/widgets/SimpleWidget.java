@@ -75,6 +75,7 @@ public abstract class SimpleWidget extends TextInfoWidget implements ISupportWid
 
 		int layoutId = getContentLayoutId();
 		UiUtilities.getInflater(mapActivity, nightMode).inflate(layoutId, container);
+		applyHeightMode();
 		findViews();
 		container.setOnLongClickListener(v -> {
 			List<PopUpMenuItem> actions = getWidgetActions();
@@ -88,6 +89,25 @@ public abstract class SimpleWidget extends TextInfoWidget implements ISupportWid
 	@LayoutRes
 	protected int getContentLayoutId() {
 		return isVerticalWidget() ? getProperVerticalLayoutId(widgetState) : getProperSideLayoutId(widgetState);
+	}
+
+	private void applyHeightMode() {
+		View widgetBg = getView().findViewById(R.id.widget_bg);
+		if (widgetBg == null) {
+			return;
+		}
+		ViewGroup.LayoutParams lp = widgetBg.getLayoutParams();
+		if (widgetState.getDynamicHeightPref().get()) {
+			lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+		} else {
+			lp.height = (int) app.getResources().getDimension(getWidgetSizePref().get().heightDimenId);
+		}
+		widgetBg.setLayoutParams(lp);
+	}
+
+	@NonNull
+	public CommonPreference<Boolean> getDynamicHeightPref() {
+		return widgetState.getDynamicHeightPref();
 	}
 
 	@NonNull
