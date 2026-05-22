@@ -47,6 +47,7 @@ public class BaseResizableWidgetSettingFragment extends WidgetInfoBaseFragment {
 
 	@Override
 	protected void setupTopContent(@NonNull ViewGroup container) {
+		super.setupTopContent(container);
 		if (widgetInfo != null && widgetInfo.widget instanceof ISupportWidgetResizing resizableWidget && resizableWidget.allowResize()) {
 			inflate(R.layout.resizable_widget_setting, container);
 
@@ -93,6 +94,7 @@ public class BaseResizableWidgetSettingFragment extends WidgetInfoBaseFragment {
 
 	@Override
 	protected void applySettings() {
+		super.applySettings();
 		if (widgetInfo != null && widgetInfo.widget instanceof ISupportWidgetResizing widgetResizing) {
 			boolean isVerticalPanel = widgetInfo.getWidgetPanel().isPanelVertical();
 			if (isVerticalPanel) {

@@ -52,6 +52,8 @@ public abstract class MapWidgetInfo implements Comparable<MapWidgetInfo> {
 	private final String hiddenKey;
 	private final String collapsedKey;
 
+	private OsmandPreference<Integer> alphaPref;
+
 	public MapWidgetInfo(@NonNull String key,
 						 @NonNull MapWidget widget,
 						 @DrawableRes int daySettingsIconId,
@@ -212,6 +214,20 @@ public abstract class MapWidgetInfo implements Comparable<MapWidgetInfo> {
 	@NonNull
 	private static OsmandPreference<String> getVisibilityPreference(@NonNull OsmandApplication app, @Nullable ScreenLayoutMode layoutMode) {
 		return app.getSettings().getMapInfoControls(layoutMode);
+	}
+
+	@NonNull
+	public OsmandPreference<Integer> getAlphaPref() {
+		if (alphaPref == null) {
+			alphaPref = getApp().getSettings()
+					.registerIntPreference("widget_alpha_" + key, 100)
+					.makeProfile();
+		}
+		return alphaPref;
+	}
+
+	public int getAlpha() {
+		return getAlphaPref().get();
 	}
 
 	@NonNull

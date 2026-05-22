@@ -241,6 +241,11 @@ public abstract class MapWidget {
 		textContainer.setTypeface(Typeface.DEFAULT, typefaceStyle);
 	}
 
+	public void setBackgroundAlpha(int alpha255) {
+		View v = getView();
+		if (v != null) v.setAlpha(alpha255 / 255f);
+	}
+
 	@NonNull
 	protected String getString(@StringRes int stringId, Object... args) {
 		if (args.length > 0) {

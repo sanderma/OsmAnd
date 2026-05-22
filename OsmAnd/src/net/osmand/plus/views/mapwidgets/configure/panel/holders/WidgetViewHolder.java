@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -33,6 +34,7 @@ public class WidgetViewHolder extends RecyclerView.ViewHolder {
 	private final View bottomDivider;
 	private final View selectableBackground;
 	private final View bottomShadow;
+	private final TextView opacityBadge;
 
 	public WidgetViewHolder(@NonNull OsmandApplication app, @NonNull ApplicationMode selectedAppMode, @NonNull View itemView) {
 		super(itemView);
@@ -43,6 +45,7 @@ public class WidgetViewHolder extends RecyclerView.ViewHolder {
 		bottomDivider = itemView.findViewById(R.id.bottom_divider);
 		selectableBackground = itemView.findViewById(R.id.selectable_widget_background);
 		bottomShadow = itemView.findViewById(R.id.bottom_shadow);
+		opacityBadge = itemView.findViewById(R.id.widget_opacity_badge);
 
 		boolean disableAnimation = app.getSettings().DO_NOT_USE_ANIMATIONS.getModeValue(selectedAppMode);
 		if (disableAnimation) {
@@ -58,6 +61,16 @@ public class WidgetViewHolder extends RecyclerView.ViewHolder {
 		OsmandApplication app = mapActivity.getApp();
 
 		title.setText(widgetItem.mapWidgetInfo.getTitle(app));
+
+		int alpha = widgetItem.mapWidgetInfo.getAlpha();
+		if (opacityBadge != null) {
+			if (alpha != 100) {
+				opacityBadge.setVisibility(View.VISIBLE);
+				opacityBadge.setText(alpha + "%");
+			} else {
+				opacityBadge.setVisibility(View.GONE);
+			}
+		}
 
 		iconsHelper.updateWidgetIcon(icon, widgetItem.mapWidgetInfo);
 		moveIcon.setVisibility(View.VISIBLE);

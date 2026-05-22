@@ -87,6 +87,17 @@
 							android:textStyle="normal"
 							tools:text="@string/poi_aerialway_transport" />
 
+						<TextView
+							android:id="@+id/widget_opacity_badge"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_gravity="center_vertical"
+							android:layout_marginEnd="@dimen/content_padding_small"
+							android:textSize="12sp"
+							android:textStyle="bold"
+							android:visibility="gone"
+							tools:text="50%" />
+
 					</LinearLayout>
 
 					<View

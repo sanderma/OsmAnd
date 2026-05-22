@@ -21,6 +21,7 @@ import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.material.slider.Slider;
 import com.google.android.material.snackbar.Snackbar;
 
 import net.osmand.aidl.AidlMapWidgetWrapper;
@@ -71,6 +72,9 @@ public class WidgetInfoBaseFragment extends BaseFullScreenFragment {
 	public static final String KEY_WIDGET_ID = "widget_id";
 	public static final String KEY_ADD_MODE = "add_mode_key";
 	public static final String KEY_SELECTED_PANEL = "selected_panel_key";
+	private static final String KEY_WIDGET_ALPHA = "selected_widget_alpha";
+
+	protected int selectedAlpha = 100;
 
 	protected ConfigureWidgetsController controller;
 	protected ApplicationMode appMode;
@@ -278,6 +282,8 @@ public class WidgetInfoBaseFragment extends BaseFullScreenFragment {
 		if (widgetInfo == null) {
 			dismiss();
 		}
+
+		selectedAlpha = bundle.containsKey(KEY_WIDGET_ALPHA) ? bundle.getInt(KEY_WIDGET_ALPHA) : (widgetInfo != null ? widgetInfo.getAlpha() : 100);
 	}
 
 	private void setupToolbar() {
@@ -332,6 +338,25 @@ public class WidgetInfoBaseFragment extends BaseFullScreenFragment {
 	}
 
 	protected void setupTopContent(@NonNull ViewGroup container) {
+		inflate(R.layout.widget_opacity_setting, container);
+		setupOpacitySlider(container);
+	}
+
+	private void setupOpacitySlider(@NonNull ViewGroup container) {
+		TextView opacityValue = container.findViewById(R.id.opacity_value);
+		Slider opacitySlider = container.findViewById(R.id.opacity_slider);
+		if (opacitySlider == null || opacityValue == null) return;
+
+		opacityValue.setText(selectedAlpha + "%");
+		opacitySlider.setValue(selectedAlpha);
+		opacitySlider.clearOnChangeListeners();
+		opacitySlider.addOnChangeListener((slider, value, fromUser) -> {
+			selectedAlpha = (int) value;
+			opacityValue.setText(selectedAlpha + "%");
+		});
+
+		int activeColor = ColorUtilities.getActiveColor(app, nightMode);
+		UiUtilities.setupSlider(opacitySlider, nightMode, activeColor, true);
 	}
 
 	protected void setupMainContent(@NonNull ViewGroup container) {
@@ -370,7 +395,7 @@ public class WidgetInfoBaseFragment extends BaseFullScreenFragment {
 	}
 
 	protected void applySettings() {
-
+		if (widgetInfo != null) widgetInfo.getAlphaPref().set(selectedAlpha);
 	}
 
 	@Override
@@ -398,6 +423,8 @@ public class WidgetInfoBaseFragment extends BaseFullScreenFragment {
 		if (layoutMode != null) {
 			outState.putSerializable(SCREEN_LAYOUT_MODE, layoutMode);
 		}
+
+		outState.putInt(KEY_WIDGET_ALPHA, selectedAlpha);
 	}
 
 	@Override

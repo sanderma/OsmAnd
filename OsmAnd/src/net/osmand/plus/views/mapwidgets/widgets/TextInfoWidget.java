@@ -41,6 +41,8 @@ public abstract class TextInfoWidget extends MapWidget implements ISupportSidePa
 	@DrawableRes
 	private int nightIconId;
 
+	private int backgroundAlpha = 255;
+
 	private Integer cachedMetricSystem;
 	private Integer cachedAltitudeMetric;
 	private Integer cachedAngularUnits;
@@ -208,9 +210,24 @@ public abstract class TextInfoWidget extends MapWidget implements ISupportSidePa
 		}
 
 		getView().setBackgroundResource(getBackgroundResource(textState));
+		applyBackgroundAlpha();
 		if (bottomDivider != null) {
 			bottomDivider.setBackgroundResource(textState.widgetDividerColorId);
 		}
+	}
+
+	@Override
+	public void setBackgroundAlpha(int alpha255) {
+		this.backgroundAlpha = alpha255;
+		applyBackgroundAlpha();
+	}
+
+	private void applyBackgroundAlpha() {
+		if (backgroundAlpha == 255) return;
+		View v = getView();
+		if (v == null) return;
+		Drawable bg = v.getBackground();
+		if (bg != null) bg.mutate().setAlpha(backgroundAlpha);
 	}
 
 	@DrawableRes

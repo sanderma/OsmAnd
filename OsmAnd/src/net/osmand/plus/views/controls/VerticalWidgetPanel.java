@@ -135,13 +135,7 @@ public class VerticalWidgetPanel extends LinearLayoutEx implements WidgetsContai
 			listener.isVisible(isAnyRowVisible);
 		}
 		if (InsetsUtils.isEdgeToEdgeSupported() && !topPanel) {
-			ScreenLayoutMode layoutMode = ScreenLayoutMode.getDefault(getContext());
-			boolean transparentWidgets = app.getSettings().getTransparentMapThemePreference(layoutMode).get();
-			if (isAnyRowVisible && !transparentWidgets) {
-				setBackgroundColor(ColorUtilities.getWidgetBackgroundColor(app, nightMode));
-			} else {
-				setBackgroundColor(Color.TRANSPARENT);
-			}
+			// Background is managed per-widget; panel stays transparent
 		}
 	}
 
@@ -443,6 +437,7 @@ public class VerticalWidgetPanel extends LinearLayoutEx implements WidgetsContai
 
 			AndroidUiHelper.updateVisibility(getTopDivider(), showTopDivider);
 			AndroidUiHelper.updateVisibility(getBottomDivider(), showBottomDivider);
+			applyWidgetAlphas();
 		}
 
 		public void updateDividerColor(boolean nightMode) {
@@ -485,6 +480,14 @@ public class VerticalWidgetPanel extends LinearLayoutEx implements WidgetsContai
 				}
 			}
 			updateRow(index, totalRows);
+			applyWidgetAlphas();
+		}
+
+		private void applyWidgetAlphas() {
+			for (MapWidgetInfo info : enabledMapWidgets) {
+				int alpha255 = Math.round(info.getAlpha() / 100f * 255);
+				info.widget.setBackgroundAlpha(alpha255);
+			}
 		}
 
 		private void setupWidgetSize(@NonNull MapWidgetInfo firstWidgetInfo, @NonNull MapWidgetInfo widgetInfo) {
